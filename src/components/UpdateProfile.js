@@ -1,13 +1,14 @@
 import React, { useRef, useState } from "react";
 import { Card, Form, Button, Alert } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { auth, setNewEmail, setNewPsw } from "../firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 export default function UpdateProfile() {
   const emailRef = useRef();
   const passwordRef = useRef();
   const passwordConfirmRef = useRef();
-  const { currentUser, updateEmail, updatePassword } = useAuth();
+  const [user] = useAuthState(auth);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -22,11 +23,11 @@ export default function UpdateProfile() {
     }
 
     const promises = [];
-    if (emailRef.current.value !== currentUser.email) {
-      promises.push(updateEmail(emailRef.current.value));
+    if (emailRef.current.value !== user.email) {
+      promises.push(setNewEmail(emailRef.current.value));
     }
     if (passwordRef.current.value) {
-      promises.push(updatePassword(passwordRef.current.value));
+      promises.push(setNewPsw(passwordRef.current.value));
     }
 
     Promise.all(promises)
@@ -54,7 +55,7 @@ export default function UpdateProfile() {
                 type="email"
                 ref={emailRef}
                 required
-                defaultValue={currentUser.email}
+                defaultValue={user.email}
               />
             </Form.Group>
             <Form.Group id="password">
@@ -62,7 +63,7 @@ export default function UpdateProfile() {
               <Form.Control
                 type="password"
                 ref={passwordRef}
-                placeholder="Leave black to keep the same"
+                placeholder="Leave blank to keep the same"
               />
             </Form.Group>
             <Form.Group id="password-confirm">
@@ -70,7 +71,7 @@ export default function UpdateProfile() {
               <Form.Control
                 type="password"
                 ref={passwordConfirmRef}
-                placeholder="Leave black to keep the same"
+                placeholder="Leave blank to keep the same"
               />
             </Form.Group>
             <Button disabled={loading} className="w-100" type="submit">

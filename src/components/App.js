@@ -1,5 +1,4 @@
 import { Container } from "react-bootstrap";
-import { AuthProvider } from "../contexts/AuthContext";
 import { Routes, Route, BrowserRouter } from "react-router-dom";
 import Dashboard from "./Dashboard";
 import Signup from "./Signup";
@@ -16,29 +15,27 @@ function App() {
     >
       <div className="w-100" style={{ maxWidth: "400px" }}>
         <BrowserRouter>
-          <AuthProvider>
-            <Routes>
-              <Route
-                path="/"
-                element={
-                  <PrivateRoute>
-                    <Dashboard />
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/update-profile"
-                element={
-                  <PrivateRoute>
-                    <UpdateProfile />
-                  </PrivateRoute>
-                }
-              />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-            </Routes>
-          </AuthProvider>
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <PrivateRoute>
+                  <Dashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/update-profile"
+              element={
+                <PrivateRoute>
+                  <UpdateProfile />
+                </PrivateRoute>
+              }
+            />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+          </Routes>
         </BrowserRouter>
       </div>
     </Container>

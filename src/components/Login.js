@@ -1,29 +1,29 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { Card, Form, Button, Alert } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { auth, loginEmailPsw, loginGoogle } from "../firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 export default function Login() {
   const emailRef = useRef();
   const passwordRef = useRef();
-  const { login } = useAuth();
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [user, loading, error] = useAuthState(auth);
   const navigate = useNavigate();
 
-  async function handleSubmit(e) {
+  function handleSubmit(e) {
     e.preventDefault();
-
-    try {
-      setLoading(true);
-      setError("");
-      await login(emailRef.current.value, passwordRef.current.value);
-      navigate("/");
-    } catch {
-      setError("Failed to login");
-    }
-    setLoading(false);
+    loginEmailPsw(emailRef.current.value, passwordRef.current.value);
   }
+
+  useEffect(() => {
+    if (loading) {
+      // maybe trigger a loading screen
+      return;
+    }
+    if (user) {
+      navigate("/");
+    }
+  }, [user, loading]);
 
   return (
     <>
@@ -40,8 +40,16 @@ export default function Login() {
               <Form.Label>Password</Form.Label>
               <Form.Control type="password" ref={passwordRef} required />
             </Form.Group>
-            <Button disabled={loading} className="w-100" type="submit">
+            <Button disabled={loading} className="w-100 mt-2" type="submit">
               Log In
+            </Button>
+            <Button
+              variant="danger"
+              disabled={loading}
+              className="w-100 mt-2"
+              onClick={loginGoogle}
+            >
+              Sign in With Google
             </Button>
           </Form>
           <div className="w-100 text-center mt-2">

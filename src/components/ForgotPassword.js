@@ -1,26 +1,32 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { Card, Form, Button, Alert } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router";
+import { auth, sendPasswordReset } from "../firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 export default function Login() {
   const emailRef = useRef();
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false);
-  const { resetPassword } = useAuth();
+  const [user, loading] = useAuthState(auth);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (loading) return;
+    if (user) navigate("/dashboard");
+  }, [user, loading]);
+
   async function handleSubmit(e) {
     e.preventDefault();
 
     try {
       setError("");
-      setLoading(true);
-      await resetPassword(emailRef.current.value);
+      await sendPasswordReset(emailRef.current.value);
       setMessage("Check your inbox for further instructions");
     } catch {
       setError("Failed to login");
     }
-    setLoading(false);
   }
 
   return (

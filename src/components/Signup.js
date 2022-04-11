@@ -1,33 +1,40 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { Card, Form, Button, Alert } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
+import { auth, registerWithEmailAndPassword } from "../firebase";
+import { useAuthState } from "react-firebase-hooks/auth";
 
 export default function Signup() {
   const emailRef = useRef();
   const passwordRef = useRef();
   const passwordConfirmRef = useRef();
-  const { signup } = useAuth();
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [customError, setCustomError] = useState("");
+  const [user, loading, error] = useAuthState(auth);
 
   const navigate = useNavigate();
 
-  async function handleSubmit(e) {
-    e.preventDefault();
+  useEffect(() => {
+    if (loading) {
+      // maybe trigger a loading screen
+      return;
+    }
+    if (user) {
+      navigate("/dashboard");
+    }
+  }, [user, loading]);
 
+  function handleSubmit(e) {
+    e.preventDefault();
+    setCustomError("");
     if (passwordRef.current.value !== passwordConfirmRef.current.value) {
-      return setError("Passwords do not match");
+      return setCustomError("Passwords do not match");
     }
-    try {
-      setLoading(true);
-      setError("");
-      await signup(emailRef.current.value, passwordRef.current.value);
-      navigate("/");
-    } catch {
-      setError("Failed to create an account.");
-    }
-    setLoading(false);
+    registerWithEmailAndPassword(
+      emailRef.current.value,
+      passwordRef.current.value
+    ).then(() => {
+      navigate("/dashboard");
+    });
   }
 
   return (
@@ -36,6 +43,7 @@ export default function Signup() {
         <Card.Body>
           <h2 className="text-center- mb-4">Sign Up</h2>
           {error && <Alert variant="danger">{error}</Alert>}
+          {customError && <Alert variant="danger">{customError}</Alert>}
           <Form onSubmit={handleSubmit}>
             <Form.Group id="email">
               <Form.Label>Email</Form.Label>
